@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Horizon DarkRP</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #070912; }
+body { font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif; color: #F7F1E6; -webkit-user-select: none; user-select: none; }
+#scene { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+
+/* twinkling stars + flickering windows (old WebKit friendly) */
+@-webkit-keyframes tw { 0%, 100% { opacity: 0.85; } 50% { opacity: 0.25; } }
+@keyframes tw { 0%, 100% { opacity: 0.85; } 50% { opacity: 0.25; } }
+.tw1 { -webkit-animation: tw 3.1s ease-in-out infinite; animation: tw 3.1s ease-in-out infinite; }
+.tw2 { -webkit-animation: tw 4.3s ease-in-out infinite 1.2s; animation: tw 4.3s ease-in-out infinite 1.2s; }
+.tw3 { -webkit-animation: tw 5.7s ease-in-out infinite 2.4s; animation: tw 5.7s ease-in-out infinite 2.4s; }
+@-webkit-keyframes fl { 0%, 92%, 100% { opacity: 0.75; } 94% { opacity: 0.1; } 96% { opacity: 0.75; } 97% { opacity: 0.15; } }
+@keyframes fl { 0%, 92%, 100% { opacity: 0.75; } 94% { opacity: 0.1; } 96% { opacity: 0.75; } 97% { opacity: 0.15; } }
+.fl { -webkit-animation: fl 7s linear infinite; animation: fl 7s linear infinite; }
+@-webkit-keyframes sh { 0%, 100% { -webkit-transform: translateX(0); } 50% { -webkit-transform: translateX(14px); } }
+@keyframes sh { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(14px); } }
+.sh { -webkit-animation: sh 6s ease-in-out infinite; animation: sh 6s ease-in-out infinite; }
+
+/* the wordmark sits just under the horizon line on any screen shape */
+#word { position: absolute; left: 0; right: 0; top: 61vh; text-align: center; font-family: 'Big Shoulders Display', Impact, 'Arial Narrow', sans-serif; font-weight: 900; font-size: 14vh; line-height: 0.9; letter-spacing: 0.07em; padding-left: 0.07em; color: #F7F1E6; }
+
+/* top corners */
+#info { position: absolute; left: 40px; top: 32px; }
+#info .name { font-family: 'Big Shoulders Display', Impact, sans-serif; font-weight: 800; font-size: 26px; letter-spacing: 0.06em; }
+#info .meta { margin-top: 4px; font-size: 17px; font-weight: 600; letter-spacing: 0.08em; color: #B8B0C8; text-transform: uppercase; }
+#info .meta b { color: #E8743B; font-weight: 700; }
+#tip { position: absolute; right: 40px; top: 32px; width: 420px; text-align: right; }
+#tip .label { font-size: 15px; font-weight: 700; letter-spacing: 0.22em; color: #E8743B; }
+#tip .text { margin-top: 6px; font-size: 21px; font-weight: 500; line-height: 1.25; color: #F7F1E6; -webkit-transition: opacity 0.6s; transition: opacity 0.6s; }
+
+/* the loading panel */
+#panel { position: absolute; left: 50%; bottom: 44px; width: 680px; margin-left: -340px; }
+#row { overflow: hidden; }
+#status { float: left; font-size: 16px; font-weight: 700; letter-spacing: 0.22em; color: #E8743B; text-transform: uppercase; }
+#count { float: right; font-size: 16px; font-weight: 700; letter-spacing: 0.12em; color: #B8B0C8; }
+#file { margin-top: 6px; font-size: 25px; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#bar { position: relative; margin-top: 14px; height: 4px; background: rgba(247, 241, 230, 0.16); }
+#fill { position: absolute; left: 0; top: 0; height: 4px; width: 0; background: #E8743B; -webkit-transition: width 0.35s ease-out; transition: width 0.35s ease-out; }
+#marker { position: absolute; top: -11px; width: 26px; height: 26px; margin-left: -13px; left: 0; -webkit-transition: left 0.35s ease-out; transition: left 0.35s ease-out; }
+#pct { position: absolute; right: 0; top: 14px; font-size: 15px; font-weight: 700; letter-spacing: 0.12em; color: #B8B0C8; }
+#recent { margin-top: 22px; height: 66px; overflow: hidden; }
+#recent div { font-size: 16px; font-weight: 500; color: #8F87A3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 22px; }
+#recent div:first-child { color: #B8B0C8; }
+</style>
+</head>
+<body>
+
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs><clipPath id="above"><rect x="0" y="0" width="1600" height="521"/></clipPath></defs>
+<rect x="0" y="-400" width="1600" height="572" fill="#0A0E1F"/>
+<rect x="0" y="170" width="1600" height="122" fill="#121834"/>
+<rect x="0" y="290" width="1600" height="92" fill="#262049"/>
+<rect x="0" y="380" width="1600" height="72" fill="#4E2B58"/>
+<rect x="0" y="450" width="1600" height="44" fill="#8E3A57"/>
+<rect x="0" y="492" width="1600" height="29" fill="#D35E47"/>
+<g fill="#F7F1E6">
+<g class="tw1"><circle cx="388" cy="44" r="2.4"/><circle cx="1269" cy="233" r="1.5"/><circle cx="322" cy="103" r="1.8"/><circle cx="457" cy="284" r="1.8"/><circle cx="1343" cy="160" r="2.4"/><circle cx="146" cy="147" r="1.8"/><circle cx="1010" cy="72" r="1.8"/><circle cx="211" cy="281" r="1.8"/><circle cx="1229" cy="132" r="1.2"/><circle cx="1576" cy="178" r="2.4"/><circle cx="397" cy="132" r="1.2"/></g>
+<g class="tw2"><circle cx="767" cy="41" r="1.2"/><circle cx="1310" cy="90" r="1.2"/><circle cx="155" cy="188" r="2.4"/><circle cx="31" cy="98" r="1.8"/><circle cx="272" cy="102" r="1.2"/><circle cx="1113" cy="56" r="1.5"/><circle cx="451" cy="116" r="1.8"/><circle cx="1418" cy="287" r="1.8"/><circle cx="478" cy="70" r="2.4"/><circle cx="1552" cy="136" r="1.5"/><circle cx="362" cy="141" r="2.4"/></g>
+<g class="tw3"><circle cx="1313" cy="245" r="1.8"/><circle cx="124" cy="275" r="2.4"/><circle cx="178" cy="33" r="1.5"/><circle cx="453" cy="181" r="1.5"/><circle cx="48" cy="97" r="1.5"/><circle cx="537" cy="18" r="1.2"/><circle cx="1037" cy="72" r="1.5"/><circle cx="1316" cy="157" r="1.2"/><circle cx="77" cy="87" r="1.5"/><circle cx="241" cy="30" r="1.8"/><circle cx="1480" cy="40" r="1.5"/><circle cx="1180" cy="210" r="1.2"/><circle cx="600" cy="-60" r="1.8"/><circle cx="1200" cy="-120" r="1.5"/><circle cx="300" cy="-90" r="2.0"/></g>
+</g>
+<g clip-path="url(#above)">
+<circle cx="800" cy="521" r="236" fill="#E8743B"/>
+<circle cx="800" cy="521" r="184" fill="#F29B45"/>
+<circle cx="800" cy="521" r="128" fill="#F8C25C"/>
+</g>
+<path fill="#0A0C17" d="M0.0 521.0 L0.0 381.0 L40.0 381.0 L40.0 412.0 L80.0 412.0 L80.0 432.0 L110.0 432.0 L110.0 399.9 L170.0 399.9 L170.0 423.1 L187.0 423.1 L187.0 383.1 L193.0 383.1 L193.0 423.1 L210.0 423.1 L210.0 398.3 L270.0 398.3 L270.0 377.0 L310.0 377.0 L310.0 412.0 L360.0 412.0 L360.0 457.8 L382.0 457.8 L382.0 417.8 L388.0 417.8 L388.0 457.8 L410.0 457.8 L410.0 437.7 L440.0 437.7 L440.0 451.8 L470.0 451.8 L470.0 467.7 L520.0 467.7 L520.0 459.8 L540.0 459.8 L540.0 472.6 L570.0 472.6 L570.0 469.7 L590.0 469.7 L590.0 479.2 L602.0 479.2 L602.0 439.2 L608.0 439.2 L608.0 479.2 L620.0 479.2 L620.0 482.4 L670.0 482.4 L670.0 494.3 L700.0 494.3 L700.0 502.5 L760.0 502.5 L760.0 504.6 L780.0 504.6 L780.0 507.0 L820.0 507.0 L820.0 503.4 L850.0 503.4 L850.0 501.9 L870.0 501.9 L870.0 494.9 L887.0 494.9 L887.0 454.9 L893.0 454.9 L893.0 494.9 L910.0 494.9 L910.0 489.1 L922.0 489.1 L922.0 449.1 L928.0 449.1 L928.0 489.1 L940.0 489.1 L940.0 480.9 L957.0 480.9 L957.0 440.9 L963.0 440.9 L963.0 480.9 L980.0 480.9 L980.0 484.5 L1030.0 484.5 L1030.0 458.8 L1090.0 458.8 L1090.0 471.3 L1130.0 471.3 L1130.0 471.1 L1160.0 471.1 L1160.0 450.2 L1210.0 450.2 L1210.0 449.1 L1240.0 449.1 L1240.0 412.6 L1262.0 412.6 L1262.0 372.6 L1268.0 372.6 L1268.0 412.6 L1290.0 412.6 L1290.0 432.7 L1320.0 432.7 L1320.0 421.2 L1370.0 421.2 L1370.0 440.2 L1390.0 440.2 L1390.0 427.6 L1450.0 427.6 L1450.0 399.3 L1462.0 399.3 L1462.0 359.3 L1468.0 359.3 L1468.0 399.3 L1480.0 399.3 L1480.0 409.6 L1530.0 409.6 L1530.0 432.1 L1547.0 432.1 L1547.0 392.1 L1553.0 392.1 L1553.0 432.1 L1570.0 432.1 L1570.0 384.6 L1600.0 384.6 L1600.0 521.0 Z"/>
+<g fill="#F6B65A" opacity="0.7"><rect x="10.2" y="476.6" width="5.5" height="7.5"/><rect x="26.7" y="415.2" width="5.5" height="7.5"/><rect x="26.9" y="492.7" width="5.5" height="7.5"/><rect x="59.3" y="458.6" width="5.5" height="7.5"/><rect x="48.3" y="427.2" width="5.5" height="7.5"/><rect x="67.2" y="443.6" width="5.5" height="7.5"/><rect x="94.5" y="459.9" width="5.5" height="7.5"/><rect x="150.6" y="468.0" width="5.5" height="7.5"/><rect x="128.3" y="428.4" width="5.5" height="7.5"/><rect x="125.6" y="464.5" width="5.5" height="7.5"/><rect x="182.2" y="500.1" width="5.5" height="7.5"/><rect x="180.5" y="436.3" width="5.5" height="7.5"/><rect x="227.3" y="453.0" width="5.5" height="7.5"/><rect x="231.5" y="465.1" width="5.5" height="7.5"/><rect x="253.4" y="504.1" width="5.5" height="7.5"/><rect x="290.5" y="469.9" width="5.5" height="7.5"/><rect x="276.8" y="391.1" width="5.5" height="7.5"/><rect x="346.8" y="425.8" width="5.5" height="7.5"/><rect x="336.4" y="463.6" width="5.5" height="7.5"/><rect x="398.0" y="472.6" width="5.5" height="7.5"/><rect x="383.5" y="496.5" width="5.5" height="7.5"/><rect x="426.8" y="491.2" width="5.5" height="7.5"/><rect x="505.3" y="488.9" width="5.5" height="7.5"/><rect x="554.2" y="503.9" width="5.5" height="7.5"/><rect x="965.2" y="498.4" width="5.5" height="7.5"/><rect x="1069.2" y="501.2" width="5.5" height="7.5"/><rect x="1104.4" y="496.5" width="5.5" height="7.5"/><rect x="1143.3" y="484.9" width="5.5" height="7.5"/><rect x="1186.5" y="505.7" width="5.5" height="7.5"/><rect x="1220.7" y="494.1" width="5.5" height="7.5"/><rect x="1264.6" y="460.4" width="5.5" height="7.5"/><rect x="1303.2" y="474.2" width="5.5" height="7.5"/><rect x="1333.4" y="484.0" width="5.5" height="7.5"/><rect x="1355.5" y="451.8" width="5.5" height="7.5"/><rect x="1376.0" y="468.4" width="5.5" height="7.5"/><rect x="1424.5" y="453.1" width="5.5" height="7.5"/><rect x="1403.1" y="499.7" width="5.5" height="7.5"/><rect x="1464.0" y="430.1" width="5.5" height="7.5"/><rect x="1461.2" y="487.6" width="5.5" height="7.5"/><rect x="1515.3" y="495.9" width="5.5" height="7.5"/><rect x="1496.1" y="433.1" width="5.5" height="7.5"/><rect x="1546.9" y="495.9" width="5.5" height="7.5"/><rect x="1587.4" y="426.9" width="5.5" height="7.5"/></g>
+<g fill="#F6B65A" class="fl"><rect x="146.3" y="418.3" width="5.5" height="7.5"/><rect x="1272.8" y="431.4" width="5.5" height="7.5"/><rect x="454.4" y="497.3" width="5.5" height="7.5"/></g>
+<rect x="0" y="521" width="1600" height="800" fill="#070912"/>
+<rect x="0" y="519" width="1600" height="3" fill="#FFD9A0"/>
+<g fill="#E8743B" class="sh"><rect x="580.0" y="532.0" width="440.0" height="3" opacity="0.85"/><rect x="598.3" y="541.0" width="403.3" height="3" opacity="0.77"/><rect x="616.7" y="551.6" width="366.7" height="3" opacity="0.70"/><rect x="635.0" y="563.8" width="330.0" height="3" opacity="0.62"/><rect x="653.3" y="577.6" width="293.3" height="3" opacity="0.54"/><rect x="671.7" y="593.0" width="256.7" height="3" opacity="0.46"/><rect x="690.0" y="610.0" width="220.0" height="3" opacity="0.39"/><rect x="708.3" y="628.6" width="183.3" height="3" opacity="0.31"/><rect x="726.7" y="648.8" width="146.7" height="3" opacity="0.23"/></g>
+<polygon points="800.0,165.0 843.6,269.9 956.9,279.0 870.6,352.9 897.0,463.5 800.0,404.2 703.0,463.5 729.4,352.9 643.1,279.0 756.4,269.9" fill="#FFCB5C" stroke="#0A0C17" stroke-width="12" stroke-linejoin="round"/>
+<polygon points="800.0,199.0 835.4,284.2 927.4,291.6 857.3,351.6 878.8,441.4 800.0,393.3 721.2,441.4 742.7,351.6 672.6,291.6 764.6,284.2" fill="none" stroke="#0A0C17" stroke-opacity="0.22" stroke-width="3" stroke-linejoin="round"/>
+<text x="800" y="408" text-anchor="middle" font-family="'Big Shoulders Display', Impact, sans-serif" font-weight="900" font-size="236" fill="#F7F1E6" stroke="#0A0C17" stroke-width="12" stroke-linejoin="round" paint-order="stroke">H</text>
+</svg>
+
+<div id="word">HORIZON</div>
+
+<div id="info">
+  <div class="name" id="server">HORIZON DARKRP</div>
+  <div class="meta"><span id="map">-</span> &nbsp;·&nbsp; <span id="mode">DarkRP</span> &nbsp;·&nbsp; <b id="slots">-</b> slots</div>
+</div>
+
+<div id="tip">
+  <div class="label">TIP</div>
+  <div class="text" id="tiptext"></div>
+</div>
+
+<div id="panel">
+  <div id="row"><div id="status">Joining server</div><div id="count"></div></div>
+  <div id="file">Connecting...</div>
+  <div id="bar">
+    <div id="fill"></div>
+    <svg id="marker" viewBox="0 0 26 26" aria-hidden="true"><polygon points="13,1 16.2,9.4 25,10.1 18.3,15.9 20.4,24.5 13,19.9 5.6,24.5 7.7,15.9 1,10.1 9.8,9.4" fill="#FFCB5C" stroke="#0A0C17" stroke-width="2" stroke-linejoin="round"/></svg>
+    <div id="pct">0%</div>
+  </div>
+  <div id="recent"></div>
+</div>
+
+<script>
+// ---------------------------------------------------------------- edit these
+var TIPS = [
+  "Airdrops come down every 45 minutes. Stay in the circle the longest to win the loot.",
+  "Printer money comes out dirty. Wash it in a Money Washer, then dry it on a rack.",
+  "Spin the Daily Wheel once every 24 hours for free prizes.",
+  "Socket gems into your guns from your inventory to make them stronger.",
+  "Join a clan to raise flags, share upgrades and fight together.",
+  "Safe zones protect you - unless you're combat blocked.",
+  "Type !airdrop to see when the next airdrop is."
+];
+var TIP_SECONDS = 7;
+
+// ---------------------------------------------------------------- state
+var total = 0, needed = 0, current = "", recent = [];
+var gotGmod = false;
+var wsDone = 0, wsTotal = 0;          // workshop progress, read from the status text when GMod sends it
+
+function el(id) { return document.getElementById(id); }
+function setText(id, t) { var e = el(id); if (e) { e.textContent = t; } }
+
+function render() {
+  var frac = 0;
+  var countText = "";
+  if (wsTotal > 0 && (total <= 0 || needed <= 0)) {
+    frac = wsDone / wsTotal;
+    countText = wsDone + " / " + wsTotal + " addons";
+  } else if (total > 0) {
+    frac = (total - needed) / total;
+    countText = (total - needed) + " / " + total + " files";
+  }
+  frac = Math.max(0, Math.min(1, frac));
+  el("fill").style.width = (frac * 100) + "%";
+  el("marker").style.left = (frac * 100) + "%";
+  setText("pct", Math.floor(frac * 100) + "%");
+  setText("count", countText);
+  setText("file", current || "Please wait...");
+  var html = "";
+  for (var i = 0; i < recent.length && i < 3; i++) {
+    html += "<div>" + recent[i].replace(/</g, "&lt;") + "</div>";
+  }
+  el("recent").innerHTML = html;
+}
+
+function pushRecent(name) {
+  if (!name || recent[0] === name) { return; }
+  recent.unshift(name);
+  if (recent.length > 3) { recent.length = 3; }
+}
+
+// "Downloading 'Some Addon' (3 of 48)" / "3/48" style text -> workshop progress
+function readProgress(text) {
+  var m = /(\d+)\s*(?:of|\/)\s*(\d+)/i.exec(text);
+  if (m) { wsDone = parseInt(m[1], 10); wsTotal = parseInt(m[2], 10); }
+}
+
+// pull a nicer name out of what GMod sends
+function cleanName(text) {
+  var q = /'([^']+)'/.exec(text) || /"([^"]+)"/.exec(text);
+  if (q) { return q[1]; }
+  var parts = String(text).split("/");
+  return parts[parts.length - 1];
+}
+
+// ---------------------------------------------------------------- called by Garry's Mod
+function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume, language) {
+  gotGmod = true;
+  if (servername) { setText("server", servername); }
+  if (mapname) { setText("map", mapname); }
+  if (gamemode) { setText("mode", gamemode); }
+  if (maxplayers) { setText("slots", maxplayers); }
+}
+
+function SetFilesTotal(t) { gotGmod = true; total = parseInt(t, 10) || 0; render(); }
+function SetFilesNeeded(n) { gotGmod = true; needed = parseInt(n, 10) || 0; render(); }
+
+function DownloadingFile(fileName) {
+  gotGmod = true;
+  var name = cleanName(fileName);
+  if (current && current !== name) { pushRecent(current); }
+  current = name;
+  setText("status", /workshop|addon/i.test(fileName) ? "Downloading workshop content" : "Downloading files");
+  readProgress(fileName);
+  render();
+}
+
+function SetStatusChanged(status) {
+  gotGmod = true;
+  var s = String(status || "");
+  readProgress(s);
+  if (/download/i.test(s) && /'|"/.test(s)) {           // "Downloading 'Addon name'": show it as the current item
+    var name = cleanName(s);
+    if (current && current !== name) { pushRecent(current); }
+    current = name;
+    setText("status", "Downloading workshop content");
+  } else {
+    setText("status", s.replace(/\.+$/, ""));
+    if (/workshop complete/i.test(s)) { wsDone = wsTotal; }
+    if (/mounting/i.test(s)) { current = "Mounting addons"; }
+    if (/lua/i.test(s)) { current = "Loading scripts"; }
+    if (/client info|sending/i.test(s)) { current = "Almost there"; }
+  }
+  render();
+}
+
+// ---------------------------------------------------------------- tips
+var tipIndex = Math.floor(Math.random() * TIPS.length);
+function nextTip() {
+  var t = el("tiptext");
+  t.style.opacity = 0;
+  setTimeout(function () {
+    tipIndex = (tipIndex + 1) % TIPS.length;
+    t.textContent = TIPS[tipIndex];
+    t.style.opacity = 1;
+  }, 600);
+}
+setText("tiptext", TIPS[tipIndex]);
+setInterval(nextTip, TIP_SECONDS * 1000);
+
+// ---------------------------------------------------------------- opened in a normal browser: play a demo so you can see it
+setTimeout(function () {
+  if (gotGmod) { return; }
+  GameDetails("Horizon DarkRP | Airdrops | Clans | Battle Pass", "", "rp_downtown_v4c_v2", 64, "", "DarkRP");
+  var addons = ["Barqs Airdrops content", "DarkInv weapons pack", "Battle Pass wheels", "Dark Laundering content", "Horizon car pack", "Horizon player models", "Map content"];
+  var i = 0;
+  SetStatusChanged("Retrieving server info...");
+  var demo = setInterval(function () {
+    if (i < addons.length) {
+      SetStatusChanged("Downloading '" + addons[i] + "' (" + (i + 1) + " of " + addons.length + ")");
+      i++;
+    } else if (i === addons.length) {
+      SetStatusChanged("Workshop Complete"); i++;
+      SetFilesTotal(40); SetFilesNeeded(40);
+    } else if (needed > 0) {
+      DownloadingFile("materials/horizon/hud_icon_" + needed + ".png");
+      SetFilesNeeded(needed - 4);
+    } else {
+      SetStatusChanged("Sending client info...");
+      clearInterval(demo);
+    }
+  }, 900);
+}, 1500);
+
+render();
+</script>
+</body>
+</html>
